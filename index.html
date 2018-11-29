@@ -347,10 +347,11 @@ disanleAutoTest.addEventListener('change',e=>{
 var autoTesting=false;
 if('path' in pageArgs){
 	sourcePathInput.value=pageArgs.path;
+	if(!autoTestDisabled()){
+		autoTesting=true;
+		testButton.click();
+	}else{
+		viewButton.click()
+	}
 }
-if(('test' in pageArgs) && !autoTestDisabled()){
-	autoTesting=true;
-	testButton.click();
-}
-pageArgs.path&&(autoTesting||viewButton.click());
 </script>
