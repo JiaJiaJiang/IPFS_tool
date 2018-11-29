@@ -145,13 +145,10 @@ function autoTestDisabled(tog){//1 || ''
 	}
 }
 function testGateway(gateway,path=toIPFSPath('QmVnS9etu7B3wN9S7DwRCtM37pwx6XJ3b48ag9A8H1akAc')){
-	var headers = new Headers();
-	headers.append('range','bytes=0-');
+	/*var headers = new Headers();
+	headers.append('range','bytes=0-');*/
 	return fetch(removeEtxSlash(`${gateway}${toIPFSPath(path)}`),{
 		method:'HEAD',
-		referrerPolicy:'origin-when-cross-origin',
-		redirect:'follow',
-		mode:'cors',
 		//headers,
 	}).then(res=>{
 			/*console.group();
