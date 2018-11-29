@@ -274,7 +274,7 @@ testButton.addEventListener('click',e=>{
 	for(let g of getSavedList()){
 		let R=new ResultBlock(g);
 		testResultArea.appendChild(R.block);
-		testGateway(g)
+		testGateway(g,toIPFSPath(sourcePathInput.value)||undefined)
 		.then(res=>{
 			if(res.ok){
 				availableGateways.push(g);
@@ -341,12 +341,12 @@ disanleAutoTest.addEventListener('change',e=>{
 
 //auto
 var autoTesting=false;
+if('path' in pageArgs){
+	sourcePathInput.value=pageArgs.path;
+}
 if(('test' in pageArgs) && !autoTestDisabled()){
 	autoTesting=true;
 	testButton.click();
 }
-if(pageArgs.path){
-	sourcePathInput.value=pageArgs.path;
-	autoTesting||viewButton.click();
-}
+pageArgs.path&&(autoTesting||viewButton.click());
 </script>
