@@ -176,6 +176,7 @@ function previewMode(mode,url,res){
 		}
 		case 'image':{
 			var I=element('img');
+			I.className='limitWidth';
 			I.src=url;
 			viewArea.appendChild(I);
 			break;
@@ -196,10 +197,21 @@ function previewMode(mode,url,res){
 			break;
 		}
 		default:{
-			var E=element('a');
-			E.innerHTML='Unable to view it, please download or open in a new tab.'
-			E.href=url;
-			viewArea.appendChild(E);
+			viewArea.innerHTML='Unable to view it, please download or click buttons bellow to open in a specific way.<br>';
+			var B=element('button');
+			B.innerHTML='video/audio';
+			B.onclick=e=>previewMode('video',url);
+			viewArea.appendChild(B);
+
+			B=element('button');
+			B.innerHTML='image';
+			B.onclick=e=>previewMode('image',url);
+			viewArea.appendChild(B);
+
+			B=element('button');
+			B.innerHTML='text';
+			B.onclick=e=>previewMode('text',url);
+			viewArea.appendChild(B);
 		}
 	}
 }
@@ -302,12 +314,10 @@ viewButton.addEventListener('click',e=>{
 		let type=res.headers.get('content-type');
 		sourceContentType.innerText=type;
 		sourceURL.innerText=sourceURL.href=decodeURIComponent(url);
-		if(type.match(/video|audio/)){
+		if(type.match(/audio/)){
 			abortFetchRequest();
 			previewMode('video',url);
-		}else if(type.match(/image/)){
-			previewMode('image',url);
-		}else if(type.match(/html|json|xml|pdf/)){
+		}else if(type.match(/html|json|xml|pdf|audio|video|image/)){
 			abortFetchRequest();
 			previewMode('iframe',url);
 		}else if(type.match(/text/)){
