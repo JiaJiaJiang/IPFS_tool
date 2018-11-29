@@ -307,7 +307,7 @@ viewButton.addEventListener('click',e=>{
 		alert(e);
 		return;
 	}
-	setPageArg('path',url);
+	setPageArg('path',sourcePathInput.value);
 	sourceViewFetchController = new AbortController();
 	sourceContentType.innerText='';
 	sourceURL.innerText=sourceURL.href='';
