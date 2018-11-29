@@ -58,7 +58,7 @@
 <div class="funcBlock">
 	<h2>source view</h2>
 	<div style="display: flex;">
-		source path : &nbsp;<input type="text" id="sourcePathInput" placeholder="/ipfs/... | Qm... | address" style="flex-grow: 1;"> <button id="viewButton">view</button>
+		source path : &nbsp;<input type="text" id="sourcePathInput" placeholder="/ipfs/... | Qm... | address" style="flex-grow: 1;"> <button id="viewButton">view</button><button id="testThenViewButton">test then view</button>
 	</div>
 	<a id="sourceURL" style="color:#blue;margin: .6em;display: block;word-break: break-all;"  target="_blank"></a>
 	<div id="sourceContentType" style="color:#ccc;margin: .6em;"></div>
@@ -291,6 +291,10 @@ testButton.addEventListener('click',e=>{
 			R.addText(`	<span class="red">Error:${e.message}</span>`);
 		})
 	}
+});
+testThenViewButton.addEventListener('click',e=>{
+	autoTesting=true;
+	testButton.click();
 });
 
 var sourceViewFetchController = new AbortController();
