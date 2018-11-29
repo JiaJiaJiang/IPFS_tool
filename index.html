@@ -279,6 +279,7 @@ testButton.addEventListener('click',e=>{
 			if(res.ok){
 				availableGateways.push(g);
 				if(availableGateways.length===1 && autoTesting){
+					autoTesting=false;
 					enabledGateway(g);
 					viewButton.click();
 				}
