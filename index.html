@@ -105,7 +105,7 @@ function rmEmptyDup(arr){
 }
 function removeEtxSlash(str){
 	//remove extra slashes in the path
-	return str.replace(/\/{2,}/g,'/');
+	return str.replace(/(?<!\:)\/{2,}/g,'/');
 }
 function toIPFSPath(addr){
 	addr=removeEtxSlash(addr.trim());
@@ -147,7 +147,9 @@ function autoTestDisabled(tog){//1 || ''
 function testGateway(gateway,path=toIPFSPath('QmVnS9etu7B3wN9S7DwRCtM37pwx6XJ3b48ag9A8H1akAc')){
 	/*var headers = new Headers();
 	headers.append('range','bytes=0-');*/
-	return fetch(removeEtxSlash(`${gateway}${toIPFSPath(path)}`),{
+	var url=removeEtxSlash(`${gateway}${toIPFSPath(path)}`);
+	console.log('testing:',url);
+	return fetch(url,{
 		method:'HEAD',
 		//headers,
 	}).then(res=>{
