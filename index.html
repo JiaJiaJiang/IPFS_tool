@@ -127,6 +127,7 @@ function enabledGateway(g){
 		g=g.trim();
 		currentGatewayInput.value=g;
 		storage.set('enabledGateway',g);
+		return g;
 	}else{
 		return storage.get('enabledGateway','').trim()||'https://ipfs.io';
 	}
@@ -296,7 +297,7 @@ function abortFetchRequest(){sourceViewFetchController.abort();sourceViewFetchCo
 viewButton.addEventListener('click',e=>{
 	if(sourceViewFetchController)sourceViewFetchController.abort();
 	try{
-		var url=removeEtxSlash(`${enabledGateway()}${toIPFSPath(sourcePathInput.value)}`);
+		var url=removeEtxSlash(`${enabledGateway(currentGatewayInput.value)}${toIPFSPath(sourcePathInput.value)}`);
 	}catch(e){
 		alert(e);
 		return;
