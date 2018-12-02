@@ -45,9 +45,9 @@
 </style>
 <span>copyright luojia@luojia.me <a target="_blank" href="https://coding.net/u/luojia/p/IPFS_tool/git">git repo</a></span>
 <div class="funcBlock">
-	<h2>Gateway</h2>
+	<h2 id="gatewayTestSwitch" onclick="gatewayTestArea.style.display=gatewayTestArea.style.display=='flex'?'none':'flex'" style="cursor: pointer;">Gateway</h2>
 	<b>Current gateway:</b><input id="currentGatewayInput" style="width:20em"></input><br>
-	<div style="display:flex;margin-top: 1em;">
+	<div style="display:flex;margin-top: 1em;" id="gatewayTestArea">
 		<div style="flex-grow: 0;margin-right: 1em;">
 			<textarea cols="30" rows="30" id="gatewayListArea" style="display: block;"></textarea>
 			<button id="testButton">Test</button> <label><input type="checkbox" id="disanleAutoTest"><span>disable auto test</span></label>
@@ -63,6 +63,15 @@
 	<a id="sourceURL" style="color:#blue;margin: .6em;display: block;word-break: break-all;"  target="_blank"></a>
 	<div id="sourceContentType" style="color:#ccc;margin: .6em;"></div>
 	<div id="viewArea"></div>
+</div>
+<div class="funcBlock">
+	<h2>help</h2>
+	hash parameters
+	<ul>
+		<li>path : the path to view when loaded</li>
+		<li>gateway : specify a gateway and will not start auto gateway test</li>
+	</ul>
+	<b>non-local gateways without https support can't be reached in https protocol pages</b>
 </div>
 <script>
 //default gateways
@@ -340,8 +349,10 @@ disanleAutoTest.addEventListener('change',e=>{
 
 //auto
 var autoTesting=false;
-pageArgs.gateway&&
-	(currentGatewayInput.value=pageArgs.gateway);
+if(pageArgs.gateway){
+	currentGatewayInput.value=pageArgs.gateway;
+	gatewayTestArea.style.display='none';
+}
 if('path' in pageArgs){
 	sourcePathInput.value=pageArgs.path;
 	if(!autoTestDisabled() && !pageArgs.gateway){
