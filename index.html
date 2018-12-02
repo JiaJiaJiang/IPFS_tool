@@ -285,7 +285,47 @@ class ResultBlock{
 		this.block.appendChild(d);
 	}
 }
-
+//for testing
+var testingFetch=new Set();
+function stopTest(){if(testingFetch.size){for(let f of testingFetch){f.abort();}}}
+function startTest(){
+	//stop test
+	stopTest();
+	
+	// test
+	var availableGateways=[];
+	testResultArea.innerHTML='';
+	gatewayTestSwitch.setAttribute('data-following','testing');
+	for(let g of getSavedList()){
+		let R=new ResultBlock(g);
+		testResultArea.appendChild(R.block);
+		let f=testGateway(g,(sourcePathInput.value.trim()&&toIPFSPath(sourcePathInput.value))||undefined)
+		.then(res=>{
+			if(res.ok){
+				availableGateways.push(g);
+				if(availableGateways.length===1 && autoTesting){
+					autoTesting=false;
+					enabledGateway(g);
+					stopTest();
+					viewButton.click();
+				}
+				R.addText(`	<span class="green">${availableGateways.length}</span>`);
+			}else{
+				throw(new Error(res.status));
+			}
+		}).catch(e=>{
+			R.addText(`	<span class="red">Error:${e.message}</span>`);
+		}).finally(()=>{
+			testingFetch.delete(f);
+			if(testingFetch.size==0){
+				gatewayTestSwitch.setAttribute('data-following','');
+			}else{
+				gatewayTestSwitch.setAttribute('data-following',`${testingFetch.size} testing`);
+			}
+		});
+		testingFetch.add(f);
+	}
+}
 
 
 //init
@@ -310,45 +350,9 @@ enabledGateway(enabledGateway());
 gatewayListArea.value=getSavedList().join('\n');
 
 //events
-var testingFetch=new Set();
-function stopTest(){if(testingFetch.size){for(let f of testingFetch){f.abort();}}}
 testButton.addEventListener('click',e=>{
 	saveList(gatewayListArea.value.split('\n'));//save
-	//stop test
-	stopTest();
-	
-	// test
-	var availableGateways=[];
-	testResultArea.innerHTML='';
-	gatewayTestSwitch.setAttribute('data-following','testing');
-	for(let g of getSavedList()){
-		let R=new ResultBlock(g);
-		testResultArea.appendChild(R.block);
-		let f=testGateway(g,(sourcePathInput.value.trim()&&toIPFSPath(sourcePathInput.value))||undefined)
-		.then(res=>{
-			if(res.ok){
-				availableGateways.push(g);
-				if(availableGateways.length===1 && autoTesting){
-					autoTesting=false;
-					enabledGateway(g);
-					viewButton.click();
-				}
-				R.addText(`	<span class="green">${availableGateways.length}</span>`);
-			}else{
-				throw(new Error(res.status));
-			}
-		}).catch(e=>{
-			R.addText(`	<span class="red">Error:${e.message}</span>`);
-		}).finally(()=>{
-			testingFetch.delete(f);
-			if(testingFetch.size==0){
-				gatewayTestSwitch.setAttribute('data-following','');
-			}else{
-				gatewayTestSwitch.setAttribute('data-following',`${testingFetch.size} testing`);
-			}
-		});
-		testingFetch.add(f);
-	}
+	startTest();
 });
 stopButton.addEventListener('click',()=>{
 	stopTest();
@@ -358,6 +362,7 @@ testThenViewButton.addEventListener('click',e=>{
 	testButton.click();
 });
 
+//for source view
 var sourceViewFetching = null;
 function abortFetchRequest(){sourceViewFetching&&sourceViewFetching.controller.abort();sourceViewFetchController=null;}
 viewButton.addEventListener('click',e=>{
