@@ -42,15 +42,20 @@
 	#sourceContentType::before{
 		content: 	'Type: ';
 	}
+	#gatewayTestSwitch::after{
+		content: attr(data-following);
+		color: red;
+		font-size: .5em;
+	}
 </style>
 <span>copyright luojia@luojia.me <a target="_blank" href="https://coding.net/u/luojia/p/IPFS_tool/git">git repo</a></span>
 <div class="funcBlock">
-	<h2 id="gatewayTestSwitch" onclick="gatewayTestArea.style.display=gatewayTestArea.style.display=='flex'?'none':'flex'" style="cursor: pointer;">Gateway</h2>
+	<h2 id="gatewayTestSwitch" data-following="" onclick="gatewayTestArea.style.display=gatewayTestArea.style.display=='flex'?'none':'flex'" style="cursor: pointer;">Gateway</h2>
 	<b>Current gateway:</b><input id="currentGatewayInput" style="width:20em"></input><br>
 	<div style="display:flex;margin-top: 1em;" id="gatewayTestArea">
 		<div style="flex-grow: 0;margin-right: 1em;">
 			<textarea cols="30" rows="30" id="gatewayListArea" style="display: block;"></textarea>
-			<button id="testButton">Test</button> <label><input type="checkbox" id="disanleAutoTest"><span>disable auto test</span></label>
+			<button id="testButton">Test</button><button id="stopButton">stop</button> <label><input type="checkbox" id="disableAutoTest"><span>disable auto test</span></label>
 		</div>
 		<div id="testResultArea" style="flex-grow: 1;display: inline-block;" title="click to select current gateway"></div>
 	</div>
@@ -150,23 +155,56 @@ function autoTestDisabled(tog){//1 || ''
 		return !!storage.get('disableAutoTest',false);
 	}
 }
+function log(t){
+	console.log(t)
+	return t;
+}
+class fetch_controllable{
+	constructor(url,opt=null){
+		this.controller = new AbortController();
+		this.fetch=fetch(url,Object.assign({signal:this.controller.signal},opt));
+	}
+	abort(){
+		this.controller.abort();
+	}
+	then(...args){
+		this.fetch=this.fetch.then(...args);
+		return this;
+	}
+	catch(...args){
+		this.fetch=this.fetch.catch(...args);
+		return this;
+	}
+	finally(...args){
+		this.fetch=this.fetch.finally(...args);
+		return this;
+	}
+}
+function fetch_c(url,opt){
+	return new fetch_controllable(url,opt);
+	/*var controller = new AbortController();
+	return {
+		f:fetch(url,Object.assign({signal:controller.signal},opt)),
+		controller,
+	}*/
+}
 function testGateway(gateway,path=toIPFSPath('QmVnS9etu7B3wN9S7DwRCtM37pwx6XJ3b48ag9A8H1akAc')){
 	/*var headers = new Headers();
 	headers.append('range','bytes=0-');*/
 	var url=removeEtxSlash(`${gateway}${toIPFSPath(path)}`);
 	console.log('testing:',url);
-	return fetch(url,{
-		method:'HEAD',
-		//headers,
-	}).then(res=>{
-			/*console.group();
-			console.log(gateway);
-			console.log(res.status);
-			console.log('ok?',res.ok);
-			console.log('location',res.headers.get('location'));
-			console.groupEnd();*/
-			return res;
-	});
+	return fetch_c(url,{
+			method:'HEAD',
+			//headers,
+		}).then(res=>{
+				/*console.group();
+				console.log(gateway);
+				console.log(res.status);
+				console.log('ok?',res.ok);
+				console.log('location',res.headers.get('location'));
+				console.groupEnd();*/
+				return res;
+		});
 }
 
 function previewMode(mode,url,res){
@@ -258,7 +296,7 @@ rmEmptyDup(location.hash.replace(/^\#/,'').split('&')).map(a=>{
 		pageArgs[p.shift()]=p.join('=');
 	}
 });
-disanleAutoTest.checked=autoTestDisabled();
+disableAutoTest.checked=autoTestDisabled();
 
 //set default gateway
 if(getSavedList().length===0){
@@ -272,15 +310,21 @@ enabledGateway(enabledGateway());
 gatewayListArea.value=getSavedList().join('\n');
 
 //events
+var testingFetch=new Set();
+function stopTest(){if(testingFetch.size){for(let f of testingFetch){f.abort();}}}
 testButton.addEventListener('click',e=>{
 	saveList(gatewayListArea.value.split('\n'));//save
+	//stop test
+	stopTest();
+	
 	// test
 	var availableGateways=[];
 	testResultArea.innerHTML='';
+	gatewayTestSwitch.setAttribute('data-following','testing');
 	for(let g of getSavedList()){
 		let R=new ResultBlock(g);
 		testResultArea.appendChild(R.block);
-		testGateway(g,toIPFSPath(sourcePathInput.value)||undefined)
+		let f=testGateway(g,(sourcePathInput.value.trim()&&toIPFSPath(sourcePathInput.value))||undefined)
 		.then(res=>{
 			if(res.ok){
 				availableGateways.push(g);
@@ -295,18 +339,30 @@ testButton.addEventListener('click',e=>{
 			}
 		}).catch(e=>{
 			R.addText(`	<span class="red">Error:${e.message}</span>`);
-		})
+		}).finally(()=>{
+			testingFetch.delete(f);
+			if(testingFetch.size==0){
+				gatewayTestSwitch.setAttribute('data-following','');
+			}else{
+				gatewayTestSwitch.setAttribute('data-following',`${testingFetch.size} testing`);
+			}
+		});
+		testingFetch.add(f);
 	}
+});
+stopButton.addEventListener('click',()=>{
+	stopTest();
 });
 testThenViewButton.addEventListener('click',e=>{
 	autoTesting=true;
 	testButton.click();
 });
 
-var sourceViewFetchController = new AbortController();
-function abortFetchRequest(){sourceViewFetchController.abort();sourceViewFetchController=null;}
+var sourceViewFetching = null;
+function abortFetchRequest(){sourceViewFetching&&sourceViewFetching.controller.abort();sourceViewFetchController=null;}
 viewButton.addEventListener('click',e=>{
-	if(sourceViewFetchController)sourceViewFetchController.abort();
+	sourceViewFetching&&abortFetchRequest();
+
 	try{
 		var url=removeEtxSlash(`${enabledGateway(currentGatewayInput.value)}${toIPFSPath(sourcePathInput.value)}`);
 	}catch(e){
@@ -314,13 +370,11 @@ viewButton.addEventListener('click',e=>{
 		return;
 	}
 	setPageArg('path',sourcePathInput.value);
-	sourceViewFetchController = new AbortController();
 	sourceContentType.innerText='';
 	sourceURL.innerText=sourceURL.href='';
 	// sourceURL.setAttribute('download',decodeURIComponent(url.split('/').pop()));
 	viewArea.innerHTML='loading...<br>';//clear
-	// console.log(url)
-	fetch(url,{signal:sourceViewFetchController.signal})
+	fetch_c(url)
 	.then(res=>{
 		let type=res.headers.get('content-type');
 		sourceContentType.innerText=type;
@@ -344,8 +398,8 @@ viewButton.addEventListener('click',e=>{
 		sourceContentType.innerText='';
 	});
 });
-disanleAutoTest.addEventListener('change',e=>{
-	autoTestDisabled(disanleAutoTest.checked);
+disableAutoTest.addEventListener('change',e=>{
+	autoTestDisabled(disableAutoTest.checked);
 });
 
 
