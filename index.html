@@ -340,9 +340,11 @@ disanleAutoTest.addEventListener('change',e=>{
 
 //auto
 var autoTesting=false;
+pageArgs.gateway&&
+	(currentGatewayInput.value=pageArgs.gateway);
 if('path' in pageArgs){
 	sourcePathInput.value=pageArgs.path;
-	if(!autoTestDisabled()){
+	if(!autoTestDisabled() && !pageArgs.gateway){
 		autoTesting=true;
 		testButton.click();
 	}else{
