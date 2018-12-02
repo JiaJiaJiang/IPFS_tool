@@ -65,13 +65,15 @@
 	<div id="viewArea"></div>
 </div>
 <div class="funcBlock">
-	<h2>help</h2>
-	hash parameters
-	<ul>
-		<li>path : the path to view when loaded</li>
-		<li>gateway : specify a gateway and will not start auto gateway test</li>
-	</ul>
-	<b>non-local gateways without https support can't be reached in https protocol pages</b>
+	<h2  style="cursor: pointer;" onclick="helpArea.style.display=helpArea.style.display?'':'none'">help</h2>
+	<div id="helpArea" style="display: none;">
+		hash parameters
+		<ul>
+			<li>path : the path to view when loaded</li>
+			<li>gateway : specify a gateway and will not start auto gateway test</li>
+		</ul>
+		<b>non-local gateways without https support can't be reached in https protocol pages</b>
+	</div>
 </div>
 <script>
 //default gateways
