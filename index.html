@@ -115,7 +115,15 @@ function rmEmptyDup(arr){
 }
 function removeEtxSlash(str){
 	//remove extra slashes in the path
-	return str.replace(/(?<!\:)\/{2,}/g,'/');
+	try{//chrome
+		var reg=new RegExp('(?<!\:)\/{2,}','g');
+		return str.replace(reg,'/');
+	}catch(e){//for others
+		console.log('fallback')
+		var rand;
+		while(str.indexOf((rand=Math.random().toString()))>=0);
+		return str.replace(/\:\//g,rand).replace(/\/{2,}/g,'/').replace(new RegExp(rand,'g'),':/');
+	}
 }
 function toIPFSPath(addr){
 	addr=removeEtxSlash(addr.trim());
