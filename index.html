@@ -49,7 +49,7 @@
 	}
 </style>
 <span>copyright luojia@luojia.me <a target="_blank" href="https://coding.net/u/luojia/p/IPFS_tool/git">git repo</a></span>
-<div class="funcBlock">
+<div class="funcBlock" id="gatewayTestBlock">
 	<h2 id="gatewayTestSwitch" data-following="" onclick="gatewayTestArea.style.display=gatewayTestArea.style.display=='flex'?'none':'flex'" style="cursor: pointer;">Gateway</h2>
 	<b>Current gateway:</b><input id="currentGatewayInput" style="width:20em"></input><br>
 	<div style="display:flex;margin-top: 1em;" id="gatewayTestArea">
@@ -60,7 +60,7 @@
 		<div id="testResultArea" style="flex-grow: 1;display: inline-block;" title="click to select current gateway"></div>
 	</div>
 </div>
-<div class="funcBlock">
+<div class="funcBlock" id="sourceViewBlock">
 	<h2>source view</h2>
 	<div style="display: flex;">
 		source path : &nbsp;<input type="text" id="sourcePathInput" placeholder="/ipfs/... | Qm... | address" style="flex-grow: 1;"> <button id="viewButton">view</button><button id="testThenViewButton">test then view</button>
@@ -244,6 +244,7 @@ function previewMode(mode,url,res){
 		case 'iframe':{
 			var I=element('iframe');
 			I.src=url;
+			I.setAttribute('allowfullscreen','true');
 			I.style='width:100%;height:90%;'
 			viewArea.appendChild(I);
 			break;
@@ -424,6 +425,7 @@ if(pageArgs.gateway){
 }
 if('path' in pageArgs){
 	gatewayTestArea.style.display='none';
+	document.body.insertBefore(sourceViewBlock,gatewayTestBlock);
 	sourcePathInput.value=pageArgs.path;
 	if(!autoTestDisabled() && !pageArgs.gateway){
 		autoTesting=true;
