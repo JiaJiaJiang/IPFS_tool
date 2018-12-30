@@ -427,7 +427,7 @@ if(pageArgs.gateway){
 if('path' in pageArgs){
 	gatewayTestArea.style.display='none';
 	document.body.insertBefore(sourceViewBlock,gatewayTestBlock);
-	sourcePathInput.value=pageArgs.path;
+	sourcePathInput.value=decodeURIComponent(pageArgs.path);
 	if(!autoTestDisabled() && !pageArgs.gateway){
 		autoTesting=true;
 		testButton.click();
