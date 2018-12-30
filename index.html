@@ -411,7 +411,7 @@ viewButton.addEventListener('click',e=>{
 		if(e.message.match(/abort/)){return;}
 		viewArea.innerHTML=`failed to load<br>${e.message}`;//clear
 		sourceContentType.innerText='';
-	});
+	}).finally(()=>sourceViewFetching=null);
 });
 disableAutoTest.addEventListener('change',e=>{
 	autoTestDisabled(disableAutoTest.checked);
