@@ -407,7 +407,7 @@ viewButton.addEventListener('click',e=>{
 			previewMode(null,url);
 		}
 	}).catch(e=>{
-		console.error(e)
+		console.log(e)
 		if(e.message.match(/abort/)){return;}
 		viewArea.innerHTML=`failed to load<br>${e.message}`;//clear
 		sourceContentType.innerText='';
