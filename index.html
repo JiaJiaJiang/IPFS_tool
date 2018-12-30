@@ -374,7 +374,7 @@ testThenViewButton.addEventListener('click',e=>{
 
 //for source view
 var sourceViewFetching = null;
-function abortFetchRequest(){sourceViewFetching&&sourceViewFetching.controller.abort();sourceViewFetchController=null;}
+function abortFetchRequest(){sourceViewFetching&&sourceViewFetching.abort();sourceViewFetching=null;}
 viewButton.addEventListener('click',e=>{
 	sourceViewFetching&&abortFetchRequest();
 
@@ -389,7 +389,7 @@ viewButton.addEventListener('click',e=>{
 	sourceURL.innerText=sourceURL.href='';
 	// sourceURL.setAttribute('download',decodeURIComponent(url.split('/').pop()));
 	viewArea.innerHTML='loading...<br>';//clear
-	fetch_c(url)
+	sourceViewFetching=fetch_c(url)
 	.then(res=>{
 		let type=res.headers.get('content-type');
 		sourceContentType.innerText=type;
