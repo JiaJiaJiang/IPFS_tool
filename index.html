@@ -81,6 +81,96 @@
 	</div>
 </div>
 <script>
+
+
+
+
+
+
+
+function rmEmptyDup(arr){
+	return  [...new Set(arr)].filter(e=>e&&e.trim());
+}
+function removeEtxSlash(str){
+	//remove extra slashes in the path
+	try{//chrome
+		var reg=new RegExp('(?<!\:)\/{2,}','g');
+		return str.replace(reg,'/');
+	}catch(e){//for others
+		console.log('fallback')
+		var rand;
+		while(str.indexOf((rand=Math.random().toString()))>=0);
+		return str.replace(/\:\//g,rand).replace(/\/{2,}/g,'/').replace(new RegExp(rand,'g'),':/');
+	}
+}
+function toIPFSPath(addr){
+	addr=removeEtxSlash(addr.trim());
+	if(addr.startsWith('/ipns/'))return addr;
+	var r;
+	if(r=addr.match(/Qm[A-z\d]{44}.*$/)){
+		return removeEtxSlash(`/ipfs/${r[0]}`);
+	}
+	throw(new Error('Cannoy parse IPFS path'));
+}
+class fetch_controllable{
+	constructor(url,opt=null){
+		this.controller = new AbortController();
+		this.fetch=fetch(url,Object.assign({signal:this.controller.signal},opt));
+	}
+	abort(){
+		this.controller.abort();
+	}
+	then(...args){
+		this.fetch=this.fetch.then(...args);
+		return this;
+	}
+	catch(...args){
+		this.fetch=this.fetch.catch(...args);
+		return this;
+	}
+	finally(...args){
+		this.fetch=this.fetch.finally(...args);
+		return this;
+	}
+}
+function fetch_c(url,opt){
+	return new fetch_controllable(url,opt);
+}
+class GatewayTester{
+	constructor(){
+		this.gatewayList=null;
+		this.testingFetch_c=new Set();
+	}
+	stop(){
+		if(this.testingFetch_c.size){
+			for(let f of this.testingFetch_c){f.abort();}
+		}
+	}
+	test(gateway,path='QmVnS9etu7B3wN9S7DwRCtM37pwx6XJ3b48ag9A8H1akAc'){
+		let url=removeEtxSlash(`${gateway}${toIPFSPath(path)}`);
+		let f=fetch_c(url,{
+			method:'HEAD',
+		}).then(res=>{
+				return res;
+		}).finally(()=>this.testingFetch_c.delete(f));
+		this.testingFetch_c.add(f);
+		return f;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //default gateways
 var defaultGatewayList=[
 	"https://ipfs.io/",
@@ -110,30 +200,6 @@ class storage{
 	}
 }
 function element(tag){return document.createElement(tag)}
-function rmEmptyDup(arr){
-	return  [...new Set(arr)].filter(e=>e&&e.trim());
-}
-function removeEtxSlash(str){
-	//remove extra slashes in the path
-	try{//chrome
-		var reg=new RegExp('(?<!\:)\/{2,}','g');
-		return str.replace(reg,'/');
-	}catch(e){//for others
-		console.log('fallback')
-		var rand;
-		while(str.indexOf((rand=Math.random().toString()))>=0);
-		return str.replace(/\:\//g,rand).replace(/\/{2,}/g,'/').replace(new RegExp(rand,'g'),':/');
-	}
-}
-function toIPFSPath(addr){
-	addr=removeEtxSlash(addr.trim());
-	if(addr.startsWith('/ipns/'))return addr;
-	var r;
-	if(r=addr.match(/Qm[A-z\d]{44}.*$/)){
-		return removeEtxSlash(`/ipfs/${r[0]}`);
-	}
-	throw(new Error('Cannoy parse IPFS path'));
-}
 function getList(){
 	return rmEmptyDup(gatewayListArea.value.split('\n'));
 }
@@ -170,53 +236,6 @@ function autoTestDisabled(tog){//1 || ''
 function log(t){
 	console.log(t)
 	return t;
-}
-class fetch_controllable{
-	constructor(url,opt=null){
-		this.controller = new AbortController();
-		this.fetch=fetch(url,Object.assign({signal:this.controller.signal},opt));
-	}
-	abort(){
-		this.controller.abort();
-	}
-	then(...args){
-		this.fetch=this.fetch.then(...args);
-		return this;
-	}
-	catch(...args){
-		this.fetch=this.fetch.catch(...args);
-		return this;
-	}
-	finally(...args){
-		this.fetch=this.fetch.finally(...args);
-		return this;
-	}
-}
-function fetch_c(url,opt){
-	return new fetch_controllable(url,opt);
-	/*var controller = new AbortController();
-	return {
-		f:fetch(url,Object.assign({signal:controller.signal},opt)),
-		controller,
-	}*/
-}
-function testGateway(gateway,path=toIPFSPath('QmVnS9etu7B3wN9S7DwRCtM37pwx6XJ3b48ag9A8H1akAc')){
-	/*var headers = new Headers();
-	headers.append('range','bytes=0-');*/
-	var url=removeEtxSlash(`${gateway}${toIPFSPath(path)}`);
-	console.log('testing:',url);
-	return fetch_c(url,{
-			method:'HEAD',
-			//headers,
-		}).then(res=>{
-				/*console.group();
-				console.log(gateway);
-				console.log(res.status);
-				console.log('ok?',res.ok);
-				console.log('location',res.headers.get('location'));
-				console.groupEnd();*/
-				return res;
-		});
 }
 
 function previewMode(mode,url,res){
@@ -299,11 +318,11 @@ class ResultBlock{
 	}
 }
 //for testing
-var testingFetch=new Set();
-function stopTest(){if(testingFetch.size){for(let f of testingFetch){f.abort();}}}
+var listTester=new GatewayTester();
+function stopTest(){listTester.stop();}
 function startTest(){
 	//stop test
-	stopTest();
+	listTester.stop();
 	
 	// test
 	var availableGateways=[];
@@ -312,14 +331,14 @@ function startTest(){
 	for(let g of getList()){
 		let R=new ResultBlock(g);
 		testResultArea.appendChild(R.block);
-		let f=testGateway(g,(sourcePathInput.value.trim()&&toIPFSPath(sourcePathInput.value))||undefined)
+		let f=listTester.test(g,sourcePathInput.value.trim()||undefined)
 		.then(res=>{
 			if(res.ok){
 				availableGateways.push(g);
 				if(availableGateways.length===1 && autoTesting){
 					autoTesting=false;
 					enabledGateway(g);
-					stopTest();
+					listTester.stop();
 					viewButton.click();
 				}
 				R.addText(`	<span class="green">${availableGateways.length}</span>`);
@@ -329,14 +348,12 @@ function startTest(){
 		}).catch(e=>{
 			R.addText(`	<span class="red">Error:${e.message}</span>`);
 		}).finally(()=>{
-			testingFetch.delete(f);
-			if(testingFetch.size==0){
+			if(listTester.testingFetch_c.size==0){
 				gatewayTestSwitch.setAttribute('data-following','');
 			}else{
-				gatewayTestSwitch.setAttribute('data-following',`${testingFetch.size} testing`);
+				gatewayTestSwitch.setAttribute('data-following',`${listTester.testingFetch_c.size} testing`);
 			}
 		});
-		testingFetch.add(f);
 	}
 }
 
