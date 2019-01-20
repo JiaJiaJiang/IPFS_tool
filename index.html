@@ -181,7 +181,7 @@ function previewMode(mode,url,res){
 		}
 		case 'text':{
 			var T=element('div');
-			T.style='width:100%;min-height:50%;max-height:100%;overflow: auto;border: 1px solid #ccc;';
+			T.style='width:100%;min-height:50%;max-height:100%;overflow: auto;border: 1px solid #ccc;white-space: pre;';
 			T.setAttribute('contenteditable','true');
 			res.text().then(t=>T.innerText=t);
 			viewArea.appendChild(T);
