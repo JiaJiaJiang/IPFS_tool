@@ -24,5 +24,5 @@
 
 ### 地址hash参数
 
-* `path` : 自动填入资源浏览区块的ipfs地址，并将自动测试网关和加载此路径。如[/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd](http://ipfs-tool.pages.luojia.me/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd)
-* `gateway` : 指定为当前页面的默认网关，如果有`path`的话将使用此网关加载资源。如[/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd&gateway=https://ipfs.io](http://ipfs-tool.pages.luojia.me/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd&gateway=https://ipfs.io)
+* `path` : 自动填入资源浏览区块的ipfs地址，并将自动测试网关和加载此路径。如[/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd](https://jiajiajiang.github.io/IPFS_tool/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd)
+* `gateway` : 指定为当前页面的默认网关，如果有`path`的话将使用此网关加载资源。如[/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd&gateway=https://ipfs.io](https://jiajiajiang.github.io/IPFS_tool/#path=Qmc3tpg69Dvk8V5PpyNgetcPma7Q8DaGqtUgBK7iwBwjrd&gateway=https://ipfs.io)
