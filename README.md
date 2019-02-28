@@ -6,7 +6,7 @@
 
 支持ipfs hash和ipns地址
 
-[演示地址](http://ipfs-tool.pages.luojia.me/)
+[演示地址](https://jiajiajiang.github.io/IPFS_tool/)
 
 # 功能介绍
 
