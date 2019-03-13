@@ -25,7 +25,7 @@ function toIPFSPath(addr){
 class fetch_controllable{
 	constructor(url,opt=null){
 		this.controller = new AbortController();
-		this.fetch=fetch(url,Object.assign({signal:this.controller.signal},opt));
+		this.fetch=fetch(url,Object.assign({signal:this.controller.signal,credentials: 'include'},opt));
 	}
 	abort(){
 		this.controller.abort();
